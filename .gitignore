@@ -1,0 +1,21 @@
+LOG.md
+RESEARCH.md
+
+# Secrets: .env at any depth; .env.example stays tracked
+.env
+
+# Python build/tool caches (any depth)
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Claude Code per-machine settings
+.claude/settings.local.json
