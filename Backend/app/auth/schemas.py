@@ -66,3 +66,13 @@ class TokenOut(BaseModel):
     access_token: str
     token_type: Literal["bearer"] = "bearer"
     user_id: uuid.UUID
+
+
+class ForgotPasswordIn(BaseModel):
+    email: Email
+
+
+class ResetPasswordIn(BaseModel):
+    # From the emailed link.
+    token: str
+    password: Password

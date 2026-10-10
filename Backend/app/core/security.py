@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 import uuid
 from datetime import timedelta
 
@@ -29,10 +31,22 @@ def burn_password_check(password: str) -> None:
     verify_password(password, _DUMMY_HASH)
 
 
-def create_access_token(user_id: uuid.UUID) -> str:
+def password_fingerprint(hashed_password: str | None) -> str:
+    """Changes whenever the password does (bcrypt salts every hash). Session and
+    reset tokens carry it, so a password change ends every session and kills
+    every older reset link."""
+    digest = hmac.new(
+        settings.jwt_secret.encode(), (hashed_password or "").encode(), hashlib.sha256
+    )
+    return digest.hexdigest()[:32]
+
+
+def create_access_token(user_id: uuid.UUID, hashed_password: str | None) -> str:
     now = utc_now()
     payload = {
         "sub": str(user_id),
+        # Ties the session to the current password: changing it ends every session.
+        "pwd": password_fingerprint(hashed_password),
         "iat": now,
         "exp": now + timedelta(minutes=settings.jwt_expire_minutes),
     }
@@ -43,16 +57,49 @@ class InvalidTokenError(Exception):
     pass
 
 
-def decode_access_token(token: str) -> uuid.UUID:
-    """Return the user id in a valid token, or raise InvalidTokenError."""
+# Reset tokens carry this audience. decode_access_token() passes no audience,
+# and PyJWT rejects a token with an unexpected "aud", so a reset link can never
+# be used as a login session.
+RESET_AUDIENCE = "password-reset"
+
+
+def create_password_reset_token(user_id: uuid.UUID, hashed_password: str | None) -> str:
+    now = utc_now()
+    payload = {
+        "sub": str(user_id),
+        "aud": RESET_AUDIENCE,
+        "pwd": password_fingerprint(hashed_password),
+        "iat": now,
+        "exp": now + timedelta(minutes=settings.password_reset_expire_minutes),
+    }
+    return jwt.encode(payload, settings.jwt_secret, algorithm=JWT_ALGORITHM)
+
+
+def decode_password_reset_token(token: str) -> tuple[uuid.UUID, str]:
+    """Return (user id, password fingerprint), or raise InvalidTokenError."""
+    try:
+        payload = jwt.decode(
+            token,
+            settings.jwt_secret,
+            algorithms=[JWT_ALGORITHM],
+            audience=RESET_AUDIENCE,
+            options={"require": ["sub", "aud", "pwd", "exp", "iat"]},
+        )
+        return uuid.UUID(payload["sub"]), str(payload["pwd"])
+    except (jwt.PyJWTError, ValueError) as exc:
+        raise InvalidTokenError from exc
+
+
+def decode_access_token(token: str) -> tuple[uuid.UUID, str]:
+    """Return (user id, password fingerprint) from a valid token, or raise InvalidTokenError."""
     try:
         payload = jwt.decode(
             token,
             settings.jwt_secret,
             # Pinning the algorithm blocks "alg: none" and algorithm-swap attacks.
             algorithms=[JWT_ALGORITHM],
-            options={"require": ["sub", "exp", "iat"]},
+            options={"require": ["sub", "pwd", "exp", "iat"]},
         )
-        return uuid.UUID(payload["sub"])
+        return uuid.UUID(payload["sub"]), str(payload["pwd"])
     except (jwt.PyJWTError, ValueError) as exc:
         raise InvalidTokenError from exc

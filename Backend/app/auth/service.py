@@ -1,3 +1,4 @@
+import hmac
 from dataclasses import dataclass
 
 from google.auth.transport import requests as google_requests
@@ -8,7 +9,14 @@ from sqlmodel import Session, select
 from app.auth.models import User
 from app.auth.schemas import RegisterIn
 from app.core.config import settings
-from app.core.security import burn_password_check, hash_password, verify_password
+from app.core.security import (
+    InvalidTokenError,
+    burn_password_check,
+    decode_password_reset_token,
+    hash_password,
+    password_fingerprint,
+    verify_password,
+)
 
 
 class EmailAlreadyRegistered(Exception):
@@ -102,6 +110,31 @@ def login_with_google(session: Session, identity: GoogleIdentity) -> User:
             raise GoogleLoginError("Google email is not verified")
         user = User(full_name=identity.name[:100], email=identity.email, google_sub=identity.sub)
 
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+class InvalidResetToken(Exception):
+    pass
+
+
+def reset_password(session: Session, token: str, new_password: str) -> User:
+    """Set a new password from an emailed reset token. Works for Google-only
+    accounts too: the link proves they own the address."""
+    try:
+        user_id, fingerprint = decode_password_reset_token(token)
+    except InvalidTokenError as exc:
+        raise InvalidResetToken from exc
+    user = session.get(User, user_id)
+    # A used token (or one issued before a later password change) no longer
+    # matches the stored hash.
+    if user is None or not hmac.compare_digest(
+        fingerprint, password_fingerprint(user.hashed_password)
+    ):
+        raise InvalidResetToken
+    user.hashed_password = hash_password(new_password)
     session.add(user)
     session.commit()
     session.refresh(user)
