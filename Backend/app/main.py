@@ -2,11 +2,13 @@ from fastapi import FastAPI
 from sqlmodel import select
 
 from app.auth.router import router as auth_router
+from app.cvs.router import router as cvs_router
 from app.core.db import SessionDep
 
 app = FastAPI(title="ResumeRadar API")
 
 app.include_router(auth_router)
+app.include_router(cvs_router)
 
 
 @app.get("/health")
