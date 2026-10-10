@@ -104,6 +104,11 @@ def login_with_google(session: Session, identity: GoogleIdentity) -> User:
         if not identity.email_verified or user.google_sub is not None:
             raise GoogleLoginError("This email is linked to a different sign-in method")
         user.google_sub = identity.sub
+        # Registering never proved anyone owned this email; Google just did. Drop
+        # the password so whoever set it (maybe an attacker who pre-registered the
+        # address) loses access. Changing it also ends their sessions. The owner
+        # can set a password again with "Forgot password".
+        user.hashed_password = None
     else:
         # 3. New user, Google-only (no password).
         if not identity.email_verified:
