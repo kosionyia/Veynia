@@ -218,7 +218,7 @@ def test_pdf_report(client, auth, done):
     assert r.status_code == 200
     assert r.headers["content-type"] == "application/pdf"
     assert r.content.startswith(b"%PDF")
-    assert 'filename="ResumeRadar-Backend-at-Acme.pdf"' in r.headers["content-disposition"]
+    assert 'filename="Veynia-Backend-at-Acme.pdf"' in r.headers["content-disposition"]
 
 
 def test_word_report_shows_corrections(client, auth, done):
@@ -248,8 +248,8 @@ def test_pdf_text_survives_unusual_characters():
 
 
 def test_download_names_are_safe():
-    assert export.filename("ResumeRadar: Engineer @ Acme/Labs", "pdf") == "ResumeRadar-Engineer-Acme-Labs.pdf"
-    assert export.filename("!!!", "docx") == "resumeradar.docx"
+    assert export.filename("Veynia: Engineer @ Acme/Labs", "pdf") == "Veynia-Engineer-Acme-Labs.pdf"
+    assert export.filename("!!!", "docx") == "veynia.docx"
 
 
 # --- compare ----------------------------------------------------------------

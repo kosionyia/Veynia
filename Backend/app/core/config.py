@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     smtp_port: int = 587
     smtp_username: str | None = None
     smtp_password: str | None = None
-    email_from: str = "ResumeRadar <no-reply@resumeradar.local>"
+    email_from: str = "Veynia <no-reply@veynia.local>"
     # Local LLM. In docker-compose the backend reaches it as http://ollama:11434.
     ollama_url: str = "http://localhost:11434"
     ollama_model: str = "llama3.2:3b"

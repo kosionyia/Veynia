@@ -8,7 +8,7 @@ from app.core.db import SessionDep
 from app.cvs.router import router as cvs_router
 from app.jobs.router import router as jobs_router
 
-app = FastAPI(title="ResumeRadar API")
+app = FastAPI(title="Veynia API")
 
 app.include_router(auth_router)
 app.include_router(cvs_router)

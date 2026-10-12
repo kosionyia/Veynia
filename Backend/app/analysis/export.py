@@ -157,5 +157,5 @@ def filename(stem: str, extension: str) -> str:
     cleaned = "".join(c if c.isalnum() else "-" for c in stem).strip("-")
     while "--" in cleaned:
         cleaned = cleaned.replace("--", "-")
-    return f"{(cleaned or 'resumeradar')[:80]}.{extension}"
+    return f"{(cleaned or 'veynia')[:80]}.{extension}"
 

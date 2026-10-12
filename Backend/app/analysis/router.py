@@ -162,7 +162,7 @@ def report(analysis_id: uuid.UUID, user: CurrentUser, session: SessionDep, forma
         raise _NOT_FOUND
     except service.NotFinished:
         raise _NOT_FINISHED
-    name = export.filename(f"ResumeRadar {export.job_label(detail)}", format)
+    name = export.filename(f"Veynia {export.job_label(detail)}", format)
     if format == "pdf":
         return _download(export.report_pdf(detail), "application/pdf", name)
     return _download(export.report_docx(detail), DOCX, name)

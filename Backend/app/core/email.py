@@ -32,9 +32,9 @@ def send_password_reset(to: str, full_name: str, token: str) -> None:
     minutes = settings.password_reset_expire_minutes
     send_email(
         to,
-        "Reset your ResumeRadar password",
+        "Reset your Veynia password",
         f"Hi {full_name.split(' ')[0]},\n\n"
-        f"Someone asked to reset the password for your ResumeRadar account. "
+        f"Someone asked to reset the password for your Veynia account. "
         f"If it was you, open this link within {minutes} minutes:\n\n{link}\n\n"
         f"If it wasn't you, ignore this email. Your password won't change.\n",
     )

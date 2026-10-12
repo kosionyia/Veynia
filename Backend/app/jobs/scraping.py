@@ -27,7 +27,7 @@ MAX_REDIRECTS = 5
 MAX_PAGE_BYTES = 2 * 1024 * 1024
 TIMEOUT = httpx.Timeout(15.0, connect=5.0)
 # Some sites refuse requests without a browser-like user agent.
-USER_AGENT = "Mozilla/5.0 (compatible; ResumeRadar/1.0; job description fetcher)"
+USER_AGENT = "Mozilla/5.0 (compatible; Veynia/1.0; job description fetcher)"
 
 PASTE_INSTEAD = "Paste the job description instead."
 
