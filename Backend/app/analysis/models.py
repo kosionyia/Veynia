@@ -32,3 +32,13 @@ class Analysis(SQLModel, table=True):
     created_at: datetime = created_at_field()
     started_at: datetime | None = timestamp_field(nullable=True)
     finished_at: datetime | None = timestamp_field(nullable=True)
+
+    # CV rewrite suggestions: asked for separately, after the analysis is done.
+    # None (never asked) → queued → running → done | failed
+    suggestions_status: str | None = Field(default=None, max_length=20)
+    suggestions_error: str | None = Field(default=None, max_length=500)
+    # [{"number", "requirement", "original", "rewritten", "explanation",
+    #   "applicable", "new_terms", "accepted"}]
+    suggestions: list[dict[str, Any]] | None = Field(default=None, sa_type=JSON)
+    suggestions_prompt_version: str | None = Field(default=None, max_length=50)
+    suggestions_requested_at: datetime | None = timestamp_field(nullable=True)
