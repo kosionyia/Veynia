@@ -10,6 +10,7 @@ import app.auth.models  # noqa: F401
 import app.cvs.models  # noqa: F401
 import app.jobs.models  # noqa: F401
 import app.analysis.models  # noqa: F401
+import app.applications.models  # noqa: F401
 from app.core.config import settings
 
 config = context.config
