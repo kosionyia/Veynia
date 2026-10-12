@@ -214,6 +214,41 @@ def test_evidence_check_rejects_empty_or_invented(quote):
     assert not evidence_found(quote, "Skills: Python, FastAPI")
 
 
+# From the real run: the CV line, and what the model quoted from it.
+REAL_CV = (
+    "Comfortable explaining implementation choices.\n"
+    "Testing & Tools: Pytest, Postman, Git, GitHub, Docker, Docker Compose\n"
+    "SELECTED BACKEND PROJECTS\nWashWagon API\nPython for Data Science — DataCamp | 2021–2022\n"
+    "Built REST APIs for authentication, savings circles and\npayments using FastAPI."
+)
+
+
+@pytest.mark.parametrize(
+    "quote",
+    [
+        "Testing & Tools: Git, GitHub, Docker, Docker Compose",  # dropped "Pytest, Postman"
+        "Built REST APIs for authentication and payments using FastAPI",  # dropped words, across a line wrap
+    ],
+)
+def test_evidence_check_accepts_quotes_with_dropped_words(quote):
+    assert evidence_found(quote, REAL_CV)
+
+
+@pytest.mark.parametrize(
+    "quote",
+    [
+        # The job's wording, not the CV's (the model did this in the real run).
+        "Curious about AI/ML and genuinely interested in building AI-powered products.",
+        # Real words, wrong order.
+        "Docker, Git, Testing & Tools",
+        # Real words, but picked from all over the CV.
+        "Comfortable Docker Python payments",
+    ],
+)
+def test_evidence_check_rejects_rearranged_or_scattered_words(quote):
+    assert not evidence_found(quote, REAL_CV)
+
+
 def test_score_with_no_requirements_is_zero():
     assert build_result([], {}, "cv")[0] == 0
 

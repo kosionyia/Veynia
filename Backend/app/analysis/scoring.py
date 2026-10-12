@@ -25,10 +25,40 @@ def normalise(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip().lower()
 
 
+def _words(text: str) -> list[str]:
+    return re.findall(r"[a-z0-9+#]+", normalise(text))
+
+
+def _close_subsequence(quote: list[str], cv: list[str]) -> bool:
+    """The quote's words appear in the CV in the same order, within a span at most
+    twice the quote's length. Small models drop words from a list when quoting it
+    ("Git, GitHub, Docker" from "Pytest, Postman, Git, GitHub, Docker"); that
+    should count, but words picked from all over the CV shouldn't."""
+    window = 2 * len(quote)
+    for start, word in enumerate(cv):
+        if word != quote[0]:
+            continue
+        position = start
+        for wanted in quote[1:]:
+            # Greedy: the earliest next match leaves the most room for the rest.
+            try:
+                position = cv.index(wanted, position + 1, start + window)
+            except ValueError:
+                break
+        else:
+            return True
+    return False
+
+
 def evidence_found(quote: str, cv_text: str) -> bool:
     # Models like to wrap quotes in quote marks or trail off with "...".
     quote = normalise(quote).strip("\"'“”‘’ ").removesuffix("...").removesuffix("…").strip()
-    return bool(quote) and quote in normalise(cv_text)
+    if not quote:
+        return False
+    if quote in normalise(cv_text):
+        return True
+    words = _words(quote)
+    return bool(words) and _close_subsequence(words, _words(cv_text))
 
 
 def build_result(
