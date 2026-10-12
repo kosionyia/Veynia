@@ -1,0 +1,9 @@
+# Built inside the image, or host-only.
+.venv
+__pycache__
+.pytest_cache
+.mypy_cache
+# Secrets come from compose at runtime, never baked into an image.
+.env*
+# Experiment data includes CV files.
+spikes/data

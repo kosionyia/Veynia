@@ -1,0 +1,7 @@
+# Built inside the image, or host-only.
+node_modules
+.next
+tsconfig.tsbuildinfo
+# Secrets come from compose at runtime, never baked into an image.
+.env*
+!.env.example
