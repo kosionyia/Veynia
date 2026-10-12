@@ -31,6 +31,14 @@ class Settings(BaseSettings):
     smtp_username: str | None = None
     smtp_password: str | None = None
     email_from: str = "ResumeRadar <no-reply@resumeradar.local>"
+    # Local LLM. In docker-compose the backend reaches it as http://ollama:11434.
+    ollama_url: str = "http://localhost:11434"
+    ollama_model: str = "llama3.2:3b"
+    # Ollama's default context is smaller and silently cuts off long input (the
+    # spike lost half the CV that way), so always set it.
+    ollama_num_ctx: int = 8192
+    # CPU-only inference: one step can take minutes.
+    ollama_timeout_seconds: float = 600
 
     @field_validator("internal_api_secret")
     @classmethod

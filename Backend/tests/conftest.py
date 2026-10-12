@@ -13,6 +13,8 @@ from sqlmodel import Session, SQLModel
 
 import app.auth.models  # noqa: F401  (register tables on SQLModel.metadata)
 import app.cvs.models  # noqa: F401  (register tables on SQLModel.metadata)
+import app.jobs.models  # noqa: F401  (register tables on SQLModel.metadata)
+import app.analysis.models  # noqa: F401  (register tables on SQLModel.metadata)
 from app.core import rate_limit
 from app.core.config import settings
 from app.core.db import get_session
