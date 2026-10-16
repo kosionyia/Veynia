@@ -5,3 +5,5 @@ type Schemas = components["schemas"];
 
 export type User = Schemas["UserOut"];
 export type Token = Schemas["TokenOut"];
+export type AnalysisSummary = Schemas["AnalysisSummary"];
+export type ApplicationStats = Schemas["ApplicationStats"];

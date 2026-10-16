@@ -17,7 +17,7 @@ export function Field({ label, name, error, hint, aside, className, ...props }: 
   return (
     <div className="space-y-1.5">
       <div className="flex items-baseline justify-between gap-4">
-        <label htmlFor={id} className="text-sm font-medium text-ink-soft">
+        <label htmlFor={id} className="text-[13px] font-semibold text-ink-soft">
           {label}
         </label>
         {aside}
@@ -28,8 +28,8 @@ export function Field({ label, name, error, hint, aside, className, ...props }: 
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
         className={cn(
-          "h-11 w-full rounded-lg border bg-card px-3.5 text-[15px] text-ink placeholder:text-muted/70",
-          "transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15",
+          "h-12 w-full rounded-xl border bg-surface px-4 text-[15px] text-ink placeholder:text-muted/70",
+          "transition-shadow focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/15",
           error ? "border-missing" : "border-line-strong",
           className,
         )}

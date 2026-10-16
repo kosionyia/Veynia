@@ -1,58 +1,75 @@
 @import "tailwindcss";
 
-/* Warm editorial: paper, ink, one deep green. Status colours are muted so the
-   score and the evidence stay the loudest things on the page. */
+/* Emerald: a light, airy app with dark green "showcase" panels. Green to teal
+   for actions; status colours are strong enough to read at a glance. */
 @theme {
-  --color-paper: #faf7f2;
-  --color-paper-deep: #f3eee5;
-  --color-card: #fffdf9;
-  --color-ink: #1c1b19;
-  --color-ink-soft: #3d3a35;
-  --color-muted: #6e695f;
-  --color-line: #e5ded2;
-  --color-line-strong: #cfc6b6;
+  --color-canvas: #f6f8f7;
+  --color-surface: #ffffff;
+  --color-sunken: #eef2f0;
+  --color-ink: #0c1a17;
+  --color-ink-soft: #25332f;
+  --color-muted: #5d6b67;
+  --color-line: #dfe6e3;
+  --color-line-strong: #c9d4d0;
 
-  --color-accent: #1f5c4a;
-  --color-accent-hover: #174839;
-  --color-accent-soft: #e4eee9;
+  --color-brand: #0ea672;
+  --color-brand-deep: #0b8a5f;
+  --color-brand-soft: #e3f6ee;
+  --color-teal: #0891b2;
+  --color-lime: #a3e635;
 
-  --color-match: #1f5c4a;
-  --color-match-soft: #e4eee9;
-  --color-partial: #9a6412;
-  --color-partial-soft: #f6ecd9;
-  --color-missing: #a4442b;
-  --color-missing-soft: #f6e4de;
+  /* The dark showcase panel (auth side panel, landing hero). */
+  --color-night: #06120f;
+  --color-night-panel: #0d1e1a;
+  --color-night-line: rgb(255 255 255 / 0.08);
+  --color-night-text: #e9fbf4;
+  --color-night-muted: #83a79c;
 
-  --font-serif: var(--font-fraunces), Georgia, "Times New Roman", serif;
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --color-match: #0e9f6e;
+  --color-match-soft: #e3f6ee;
+  --color-partial: #b7791f;
+  --color-partial-soft: #fdf3dc;
+  --color-missing: #e11d48;
+  --color-missing-soft: #ffe8ed;
 
-  --radius-card: 0.875rem;
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
   color-scheme: light;
+  --gradient-brand: linear-gradient(135deg, #0ea672, #0891b2);
+  --gradient-glow: linear-gradient(90deg, #a3e635, #34d399);
 }
 
 body {
-  background: var(--color-paper);
+  background: var(--color-canvas);
   color: var(--color-ink);
   font-family: var(--font-sans);
 }
 
-::selection {
-  background: var(--color-accent-soft);
-  color: var(--color-ink);
-}
-
-/* Headings get the serif and slightly tighter tracking. */
 h1,
 h2,
 h3 {
-  font-family: var(--font-serif);
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: var(--color-brand-soft);
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-brand);
   outline-offset: 2px;
+}
+
+@utility bg-brand-gradient {
+  background-image: var(--gradient-brand);
+}
+
+@utility text-glow {
+  background-image: var(--gradient-glow);
+  background-clip: text;
+  color: transparent;
 }

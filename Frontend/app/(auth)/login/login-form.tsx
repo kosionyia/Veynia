@@ -32,13 +32,13 @@ export function LoginForm({ next }: { next: string }) {
         required
         error={state.fieldErrors?.password}
         aside={
-          <Link href="/forgot-password" className="text-sm text-muted underline-offset-4 hover:text-accent hover:underline">
+          <Link href="/forgot-password" className="text-sm text-muted underline-offset-4 hover:text-brand hover:underline">
             Forgot password?
           </Link>
         }
       />
-      <SubmitButton className="w-full" size="lg" pendingText="Signing in…">
-        Sign in
+      <SubmitButton className="mt-2 w-full" size="lg" pendingText="Signing in…">
+        Sign in →
       </SubmitButton>
     </form>
   );

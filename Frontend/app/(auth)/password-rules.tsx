@@ -16,7 +16,7 @@ export function PasswordRules({ password }: { password: string }) {
       {RULES.map((rule) => {
         const ok = rule.test(password);
         return (
-          <li key={rule.label} className={cn("flex items-center gap-1.5 text-xs", ok ? "text-match" : "text-muted")}>
+          <li key={rule.label} className={cn("flex items-center gap-1.5 text-xs", ok ? "font-semibold text-match" : "text-muted")}>
             <span aria-hidden>{ok ? "✓" : "·"}</span>
             {rule.label}
             <span className="sr-only">{ok ? "(done)" : "(not yet)"}</span>

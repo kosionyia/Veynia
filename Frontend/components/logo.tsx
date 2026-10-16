@@ -2,22 +2,26 @@ import Link from "next/link";
 
 import { cn } from "@/lib/cn";
 
-// Wordmark: serif name with a small green mark, the "vein" running through it.
-export function Logo({ href = "/", className }: { href?: string; className?: string }) {
+export function Logo({
+  href = "/",
+  className,
+  tone = "dark",
+}: {
+  href?: string;
+  className?: string;
+  tone?: "dark" | "light";
+}) {
   return (
-    <Link href={href} className={cn("inline-flex items-center gap-2 text-ink", className)}>
-      <svg viewBox="0 0 24 24" aria-hidden className="size-6">
-        <circle cx="12" cy="12" r="11" fill="var(--color-accent)" />
-        <path
-          d="M7 7.5 L12 17 L17 7.5"
-          fill="none"
-          stroke="var(--color-paper)"
-          strokeWidth="2.2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-      <span className="font-serif text-xl font-semibold tracking-tight">Veynia</span>
+    <Link
+      href={href}
+      className={cn("inline-flex items-center gap-2.5", tone === "light" ? "text-night-text" : "text-ink", className)}
+    >
+      <span className="bg-brand-gradient grid size-8 place-items-center rounded-[10px] text-white shadow-[0_6px_16px_-6px_var(--color-brand)]">
+        <svg viewBox="0 0 24 24" aria-hidden className="size-4">
+          <path d="M6 6.5 12 18l6-11.5" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </span>
+      <span className="font-display text-xl font-bold tracking-tight">Veynia</span>
     </Link>
   );
 }

@@ -43,8 +43,8 @@ export function RegisterForm() {
         error={state.fieldErrors?.password}
         hint={<PasswordRules password={password} />}
       />
-      <SubmitButton className="w-full" size="lg" pendingText="Creating your account…">
-        Create account
+      <SubmitButton className="mt-2 w-full" size="lg" pendingText="Creating your account…">
+        Create free account →
       </SubmitButton>
     </form>
   );

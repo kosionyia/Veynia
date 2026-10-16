@@ -24,16 +24,18 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
 
   return (
     <div className="space-y-8">
-      <header className="space-y-2">
-        <h1 className="text-4xl font-semibold text-ink">Welcome back</h1>
-        <p className="text-muted">Sign in to see your match reports and applications.</p>
+      <header className="space-y-2.5">
+        <h1 className="text-[34px] leading-tight font-bold text-ink">Welcome back</h1>
+        <p className="text-muted">Sign in to pick up where you left off.</p>
       </header>
       {notice && <Alert tone={notice.tone}>{notice.text}</Alert>}
-      <LoginForm next={one("next")} />
-      <GoogleButton />
+      <div>
+        <GoogleButton />
+        <LoginForm next={one("next")} />
+      </div>
       <p className="text-sm text-muted">
         New to Veynia?{" "}
-        <Link href="/register" className="font-medium text-accent underline-offset-4 hover:underline">
+        <Link href="/register" className="font-semibold text-brand underline-offset-4 hover:underline">
           Create an account
         </Link>
       </p>

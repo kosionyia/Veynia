@@ -39,19 +39,19 @@ export function GoogleButton() {
         if (result?.error) setError(result.error);
       },
     });
-    id.renderButton(slot.current, { theme: "outline", size: "large", shape: "pill", width: 384, text: "continue_with" });
+    id.renderButton(slot.current, { theme: "outline", size: "large", shape: "rectangular", width: 400, text: "continue_with" });
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3 text-xs uppercase tracking-widest text-muted">
+    <div className="space-y-5">
+      {error && <Alert tone="error">{error}</Alert>}
+      <div ref={slot} className="flex h-11 justify-center" />
+      <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" onReady={render} />
+      <div className="flex items-center gap-3 text-xs text-muted">
         <span className="h-px flex-1 bg-line" />
-        or
+        or with email
         <span className="h-px flex-1 bg-line" />
       </div>
-      {error && <Alert tone="error">{error}</Alert>}
-      <div ref={slot} className="flex justify-center" />
-      <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" onReady={render} />
     </div>
   );
 }

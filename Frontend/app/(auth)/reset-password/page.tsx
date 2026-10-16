@@ -12,7 +12,7 @@ export default async function ResetPasswordPage({ searchParams }: PageProps<"/re
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <h1 className="text-4xl font-semibold text-ink">Choose a new password</h1>
+        <h1 className="text-[34px] leading-tight font-bold text-ink">Choose a new password</h1>
         <p className="text-muted">You&apos;ll be signed out on other devices once it&apos;s changed.</p>
       </header>
       {typeof token === "string" && token ? (
