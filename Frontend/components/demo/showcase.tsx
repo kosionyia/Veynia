@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/cn";
 
+import { FitWidth } from "./fit-width";
 import { ProductDemo } from "./product-demo";
 
 // The dark green background: two soft glows and a faint grid. Layout and
@@ -35,7 +36,12 @@ export function Showcase({ headline = true, className }: { headline?: boolean; c
           </h2>
         </>
       )}
-      <ProductDemo className={headline ? "mt-7" : undefined} />
+      <div className={headline ? "mt-7" : undefined}>
+        {/* Designed at ~680px; on phones it's scaled down rather than squeezed. */}
+        <FitWidth width={680}>
+          <ProductDemo />
+        </FitWidth>
+      </div>
       <dl className="mt-7 flex [@media(max-height:820px)]:hidden flex-wrap gap-x-10 gap-y-4 text-[13px] text-night-muted">
         {[
           ["2 min", "to your first report"],

@@ -22,16 +22,18 @@ from tests.cvs.test_cvs import signed_in
 LINE_0 = "Built and shipped feature 0 with Python and PostgreSQL for a team of five."
 LINE_1 = "Built and shipped feature 1 with Python and PostgreSQL for a team of five."
 
+# The model answers with a line number (see pipeline.cv_lines); 0 = nothing related.
+# In the uploaded CV, line 1 is the name, 2 the skills, 3 LINE_0, 4 LINE_1.
 SUGGESTIONS = [
     # 2 = FastAPI (partial): reworded, nothing new.
-    {"number": 2, "original": LINE_0, "rewritten": LINE_0.replace("Python and", "Python, FastAPI and"), "explanation": "Names FastAPI."},
+    {"number": 2, "line": 3, "rewritten": LINE_0.replace("Python and", "Python, FastAPI and"), "explanation": "Names FastAPI."},
     # 4 = AWS (matched, but its quote was invented): adds a term the CV lacks.
-    {"number": 4, "original": LINE_1, "rewritten": LINE_1.replace(" for", " on AWS for"), "explanation": "Mentions cloud."},
+    {"number": 4, "line": 4, "rewritten": LINE_1.replace(" for", " on AWS for"), "explanation": "Mentions cloud."},
     # 3 = Kubernetes (missing): nothing related, a gap.
-    {"number": 3, "original": "", "rewritten": "", "explanation": "Get hands-on with Kubernetes."},
+    {"number": 3, "line": 0, "rewritten": "", "explanation": "Get hands-on with Kubernetes."},
     # Not asked for (1 earned full points), and a repeat: both ignored.
-    {"number": 1, "original": LINE_0, "rewritten": "x", "explanation": "?"},
-    {"number": 2, "original": "Led a team of 50", "rewritten": "Led a big team", "explanation": "?"},
+    {"number": 1, "line": 3, "rewritten": "x", "explanation": "?"},
+    {"number": 2, "line": 5, "rewritten": "Led a big team", "explanation": "?"},
 ]
 
 
@@ -43,6 +45,7 @@ class FakeLLMWithSuggestions(FakeLLM):
     def __call__(self, system, user, schema):
         if schema is SuggestOutput:
             self.calls.append(schema.__name__)
+            self.suggest_prompt = user
             if self.error:
                 raise self.error
             return SuggestOutput(suggestions=self.suggestions)
@@ -131,16 +134,26 @@ def test_suggestions_are_checked_before_use(client, auth, done, fake_llm):
     assert sorted(by_number) == [2, 3, 4]  # only what lost points; repeats dropped
 
     fastapi, kubernetes, aws = by_number[2], by_number[3], by_number[4]
+    # The original comes from the CV itself, not from the model's copy of it.
+    assert fastapi["original"] == LINE_0
     assert fastapi["applicable"] and fastapi["new_terms"] == [] and not fastapi["accepted"]
     assert aws["applicable"] and aws["new_terms"] == ["AWS"]  # the user must vouch for it
     assert (kubernetes["original"], kubernetes["applicable"]) == ("", False)  # a gap
 
 
-def test_invented_original_cannot_be_applied(client, auth, done, fake_llm):
-    fake_llm.suggestions = [{"number": 2, "original": "Led a team of 50 engineers", "rewritten": "Led 50 engineers", "explanation": "."}]
+def test_the_prompt_numbers_the_cv_lines_and_points_at_known_quotes(client, auth, done, fake_llm):
+    request(client, auth, done)
+    prompt = fake_llm.suggest_prompt
+    assert f"3: {LINE_0}" in prompt
+    # FastAPI was partly matched with a quote from line 3: the model is told so.
+    assert "2. FastAPI (closest CV line: 3)" in prompt
+
+
+def test_a_line_that_isnt_in_the_cv_is_a_gap(client, auth, done, fake_llm):
+    fake_llm.suggestions = [{"number": 2, "line": 99, "rewritten": "Led 50 engineers", "explanation": "."}]
     request(client, auth, done)
     suggestion = get(client, auth, done)["suggestions"][0]
-    assert suggestion["applicable"] is False
+    assert (suggestion["original"], suggestion["applicable"]) == ("", False)
     r = client.patch(f"/analyses/{done}/suggestions/2", headers=auth, json={"accepted": True})
     assert r.status_code == 409
 
@@ -318,6 +331,23 @@ def test_new_terms_ignores_a_capital_that_starts_the_sentence():
     assert new_terms(rewrite, cv, cv, "Strong proficiency with React and Python") == ["proficiency"]
     # A name starting a sentence is still caught when the job asked for it.
     assert new_terms("Deployed on AWS. Kubernetes later", cv, cv, "Kubernetes and cloud") == ["AWS", "Kubernetes"]
+
+
+def test_cv_lines_joins_wrapped_sentences_and_skips_blanks():
+    text = "Ada Okafor\n\nWrote SQL queries in PostgreSQL to report weekly customer growth to the product\nteam.\n- Built Excel dashboards.\nSKILLS\nSQL, Python"
+    assert pipeline.cv_lines(text) == [
+        "Ada Okafor",
+        "Wrote SQL queries in PostgreSQL to report weekly customer growth to the product team.",
+        "Built Excel dashboards.",
+        "SKILLS",
+        "SQL, Python",
+    ]
+
+
+def test_cv_lines_drop_bullets_so_a_rewrite_keeps_them():
+    # The model's rewrite has no bullet; replacing only the text keeps the CV's.
+    text = "- Built Excel dashboards.\n• Led a study group.\n* Ran surveys\n– Taught Python"
+    assert pipeline.cv_lines(text) == ["Built Excel dashboards.", "Led a study group.", "Ran surveys", "Taught Python"]
 
 
 def test_apply_rewrites_handles_overlaps_and_order():

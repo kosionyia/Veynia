@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
+import { DM_Sans, Outfit } from "next/font/google";
 
 import { THEME_SCRIPT } from "@/lib/theme";
 
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({ variable: "--font-space-grotesk", subsets: ["latin"] });
-const jakarta = Plus_Jakarta_Sans({ variable: "--font-jakarta", subsets: ["latin"] });
+// Outfit for headings and numbers, DM Sans for text: friendly, round, calm.
+const outfit = Outfit({ variable: "--font-outfit", subsets: ["latin"] });
+const dmSans = DM_Sans({ variable: "--font-dm-sans", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: { default: "Veynia", template: "%s · Veynia" },
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     // suppressHydrationWarning: the theme script sets data-theme before React loads.
-    <html lang="en" className={`${spaceGrotesk.variable} ${jakarta.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${outfit.variable} ${dmSans.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
