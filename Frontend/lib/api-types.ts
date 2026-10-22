@@ -100,6 +100,28 @@ export interface paths {
         get: operations["me_auth_me_get"];
         put?: never;
         post?: never;
+        /** Delete Me */
+        delete: operations["delete_me_auth_me_delete"];
+        options?: never;
+        head?: never;
+        /** Update Me */
+        patch: operations["update_me_auth_me_patch"];
+        trace?: never;
+    };
+    "/auth/change-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change Password
+         * @description Returns a new token: the change ends every older session, this one too.
+         */
+        post: operations["change_password_auth_change_password_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -749,6 +771,13 @@ export interface components {
              */
             updated_at: string;
         };
+        /** ChangePasswordIn */
+        ChangePasswordIn: {
+            /** Current Password */
+            current_password: string;
+            /** New Password */
+            new_password: string;
+        };
         /** Comparison */
         Comparison: {
             first: components["schemas"]["AnalysisSummary"];
@@ -795,6 +824,16 @@ export interface components {
             status: ("matched" | "partial" | "missing") | null;
             /** Note */
             note?: string | null;
+        };
+        /**
+         * DeleteAccountIn
+         * @description The password, or for Google-only accounts (no password) the email.
+         */
+        DeleteAccountIn: {
+            /** Password */
+            password?: string | null;
+            /** Email */
+            email?: string | null;
         };
         /** ForgotPasswordIn */
         ForgotPasswordIn: {
@@ -891,6 +930,35 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+        };
+        /**
+         * MeOut
+         * @description The signed-in user, for the settings page.
+         */
+        MeOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Full Name */
+            full_name: string;
+            /** Email */
+            email: string;
+            /** Has Password */
+            has_password: boolean;
+            /** Google Linked */
+            google_linked: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** ProfileUpdate */
+        ProfileUpdate: {
+            /** Full Name */
+            full_name: string;
         };
         /** RegisterIn */
         RegisterIn: {
@@ -1217,7 +1285,104 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserOut"];
+                    "application/json": components["schemas"]["MeOut"];
+                };
+            };
+        };
+    };
+    delete_me_auth_me_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteAccountIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_me_auth_me_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    change_password_auth_change_password_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TokenOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

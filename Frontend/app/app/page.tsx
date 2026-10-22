@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { icons } from "@/components/app/icons";
+import { ScoreBadge } from "@/components/app/score-badge";
+import { ButtonLink } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { getUser } from "@/lib/dal";
@@ -32,12 +35,9 @@ export default async function OverviewPage() {
           <p className="text-sm font-medium text-muted">{greeting()}</p>
           <h1 className="mt-1 text-3xl font-bold text-ink sm:text-4xl">{user.full_name.split(" ")[0]}, here&apos;s your search</h1>
         </div>
-        <span
-          title="Arrives with match reports"
-          className="bg-brand-gradient inline-flex h-11 cursor-default items-center gap-2 rounded-xl px-5 text-sm font-semibold text-white opacity-60"
-        >
+        <ButtonLink href="/app/analyses/new">
           New match report <icons.arrow className="size-4" />
-        </span>
+        </ButtonLink>
       </header>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Your numbers">
@@ -53,11 +53,19 @@ export default async function OverviewPage() {
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <section className="rounded-2xl border border-line bg-surface p-6">
-          <h2 className="text-lg font-bold text-ink">Recent match reports</h2>
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-lg font-bold text-ink">Recent match reports</h2>
+            {analyses.length > 6 && (
+              <Link href="/app/analyses" className="text-sm font-semibold text-brand underline-offset-4 hover:underline">
+                See all
+              </Link>
+            )}
+          </div>
           {analyses.length ? (
             <ul className="mt-4 divide-y divide-line">
               {analyses.slice(0, 6).map((a) => (
-                <li key={a.id} className="flex items-center gap-4 py-3">
+                <li key={a.id}>
+                  <Link href={`/app/analyses/${a.id}`} className="-mx-3 flex items-center gap-4 rounded-xl px-3 py-3 transition-colors hover:bg-sunken/60">
                   <ScoreBadge score={a.score} status={a.status} />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-ink">
@@ -69,6 +77,7 @@ export default async function OverviewPage() {
                   <time className="text-xs text-muted" dateTime={a.created_at}>
                     {new Date(a.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
                   </time>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -78,7 +87,12 @@ export default async function OverviewPage() {
         </section>
 
         <section className="rounded-2xl border border-line bg-surface p-6">
-          <h2 className="text-lg font-bold text-ink">Applications by stage</h2>
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-lg font-bold text-ink">Applications by stage</h2>
+            <Link href="/app/applications" className="text-sm font-semibold text-brand underline-offset-4 hover:underline">
+              Open
+            </Link>
+          </div>
           <Pipeline stats={stats} />
         </section>
       </div>
@@ -94,18 +108,6 @@ function Stat({ label, value, hint, accent }: { label: string; value: number | s
       <p className={cn("mt-1 text-xs", accent ? "text-night-muted" : "text-muted")}>{hint}</p>
     </div>
   );
-}
-
-function ScoreBadge({ score, status }: { score: number | null; status: AnalysisSummary["status"] }) {
-  if (score === null) {
-    return (
-      <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-sunken text-[10px] font-semibold text-muted uppercase">
-        {status === "failed" ? "Failed" : "…"}
-      </span>
-    );
-  }
-  const tone = score >= 75 ? "bg-match-soft text-match" : score >= 50 ? "bg-partial-soft text-partial" : "bg-missing-soft text-missing";
-  return <span className={cn("grid size-11 shrink-0 place-items-center rounded-xl font-display text-base font-bold", tone)}>{score}</span>;
 }
 
 const STAGES = [
@@ -136,7 +138,7 @@ function Pipeline({ stats }: { stats: ApplicationStats }) {
           );
         })}
       </ul>
-      {stats.total === 0 && <p className="mt-5 text-sm text-muted">Save a job from a match report and it shows up here.</p>}
+      {stats.total === 0 && <p className="mt-5 text-sm text-muted">Track a job from a match report and it shows up here.</p>}
     </>
   );
 }

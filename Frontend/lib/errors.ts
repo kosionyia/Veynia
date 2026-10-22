@@ -7,6 +7,9 @@ export type ApiProblem = {
   status: number;
   message: string;
   fieldErrors: FieldErrors;
+  // Anything else an object detail carried, e.g. the id of the application
+  // that's already tracked.
+  data?: Record<string, unknown>;
 };
 
 type ValidationItem = { loc?: (string | number)[]; msg?: string };
@@ -43,6 +46,10 @@ export function problemFrom(status: number, body: unknown, retryAfter?: string |
   }
 
   if (typeof detail === "string" && detail) return { status, message: detail, fieldErrors: {} };
+  if (detail && typeof detail === "object" && !Array.isArray(detail)) {
+    const { message, ...data } = detail as Record<string, unknown>;
+    if (typeof message === "string" && message) return { status, message, fieldErrors: {}, data };
+  }
   if (status >= 500) return { status, message: GENERIC, fieldErrors: {} };
   return { status, message: GENERIC, fieldErrors: {} };
 }

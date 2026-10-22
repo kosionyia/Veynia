@@ -27,6 +27,13 @@ describe("problemFrom", () => {
     expect(problemFrom(409, { detail: "Email already registered" }).message).toBe("Email already registered");
   });
 
+  it("reads the message from object details and keeps the rest", () => {
+    const body = { detail: { message: "You're already tracking this application.", application_id: "abc" } };
+    const problem = problemFrom(409, body);
+    expect(problem.message).toBe("You're already tracking this application.");
+    expect(problem.data).toEqual({ application_id: "abc" });
+  });
+
   it("says how long to wait after a 429", () => {
     expect(problemFrom(429, { detail: "Too many attempts." }, "42").message).toBe("Too many attempts. Try again in 42 seconds.");
     expect(problemFrom(429, null, "900").message).toBe("Too many attempts. Try again in 15 minutes.");

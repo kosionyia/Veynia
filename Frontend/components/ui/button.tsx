@@ -3,8 +3,8 @@ import type { ComponentProps } from "react";
 
 import { cn } from "@/lib/cn";
 
-type Variant = "primary" | "secondary" | "ghost";
-type Size = "md" | "lg";
+type Variant = "primary" | "secondary" | "ghost" | "danger" | "on-dark";
+type Size = "sm" | "md" | "lg" | "icon";
 
 const base =
   "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60";
@@ -14,11 +14,18 @@ const variants: Record<Variant, string> = {
     "bg-brand-gradient text-white shadow-[0_10px_28px_-12px_var(--color-brand)] hover:brightness-105 hover:shadow-[0_14px_32px_-12px_var(--color-brand)] active:brightness-95",
   secondary: "border border-line bg-surface text-ink hover:border-line-strong hover:bg-sunken/60",
   ghost: "text-ink-soft hover:bg-sunken hover:text-ink",
+  danger: "border border-missing/30 bg-surface text-missing hover:bg-missing-soft",
+  // For the dark green panels.
+  "on-dark": "bg-white/10 text-night-text hover:bg-white/15",
 };
 
 const sizes: Record<Size, string> = {
+  sm: "h-9 px-3 text-[13px]",
   md: "h-10 px-4 text-sm",
   lg: "h-12 px-6 text-[15px]",
+  // Square, no padding: overriding px-* with className doesn't work, since
+  // classes aren't merged and px-4 wins over px-0 in the stylesheet.
+  icon: "size-10",
 };
 
 type Style = { variant?: Variant; size?: Size };

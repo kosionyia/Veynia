@@ -42,6 +42,38 @@
   --gradient-glow: linear-gradient(90deg, #a3e635, #34d399);
 }
 
+/* Dark theme: the same tokens, redefined. <html data-theme> is set to "light"
+   or "dark" before the first paint by the script in app/layout.tsx (from the
+   veynia_theme cookie; "system" is resolved there from the device setting).
+   Unlayered, so it wins over @theme's :root values. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-canvas: #08110f;
+  --color-surface: #0f1b18;
+  --color-sunken: #15241f;
+  --color-ink: #e7f3ef;
+  --color-ink-soft: #c3d5cf;
+  --color-muted: #8ba59d;
+  --color-line: #1f322d;
+  --color-line-strong: #2c4640;
+
+  --color-brand: #10b981;
+  --color-brand-deep: #34d399;
+  --color-brand-soft: #0f3229;
+  --color-teal: #22b8d6;
+
+  /* Lighter than the page here, so the green panels still stand out. */
+  --color-night: #0b241e;
+  --color-night-panel: #0f2c25;
+
+  --color-match: #34d399;
+  --color-match-soft: #0f3229;
+  --color-partial: #f2b84b;
+  --color-partial-soft: #3a2c10;
+  --color-missing: #fb7185;
+  --color-missing-soft: #3b1520;
+}
+
 body {
   background: var(--color-canvas);
   color: var(--color-ink);

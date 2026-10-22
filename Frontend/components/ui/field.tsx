@@ -11,6 +11,10 @@ type FieldProps = ComponentProps<"input"> & {
   aside?: ReactNode;
 };
 
+// Shared with the textareas and selects that don't use Field.
+export const inputClass =
+  "w-full rounded-xl border bg-surface px-4 text-[15px] text-ink placeholder:text-muted/70 transition-shadow focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/15 disabled:cursor-not-allowed disabled:bg-sunken disabled:text-muted";
+
 export function Field({ label, name, error, hint, aside, className, ...props }: FieldProps) {
   const id = props.id ?? name;
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
@@ -28,8 +32,8 @@ export function Field({ label, name, error, hint, aside, className, ...props }: 
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
         className={cn(
-          "h-12 w-full rounded-xl border bg-surface px-4 text-[15px] text-ink placeholder:text-muted/70",
-          "transition-shadow focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/15",
+          inputClass,
+          "h-12",
           error ? "border-missing" : "border-line-strong",
           className,
         )}
