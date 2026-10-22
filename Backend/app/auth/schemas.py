@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from typing import Annotated, Literal
 
 from pydantic import (
@@ -55,6 +56,31 @@ class UserOut(BaseModel):
     id: uuid.UUID
     full_name: str
     email: str
+
+
+class MeOut(UserOut):
+    """The signed-in user, for the settings page."""
+
+    has_password: bool
+    google_linked: bool
+    created_at: datetime
+
+
+class ProfileUpdate(BaseModel):
+    # Only the name for now: changing the email needs a confirmation email first.
+    full_name: FullName
+
+
+class ChangePasswordIn(BaseModel):
+    current_password: str
+    new_password: Password
+
+
+class DeleteAccountIn(BaseModel):
+    """The password, or for Google-only accounts (no password) the email."""
+
+    password: str | None = None
+    email: str | None = None
 
 
 class GoogleLoginIn(BaseModel):

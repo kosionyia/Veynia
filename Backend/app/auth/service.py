@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
 from app.auth.models import User
-from app.auth.schemas import RegisterIn
+from app.auth.schemas import MeOut, ProfileUpdate, RegisterIn
 from app.core.config import settings
 from app.core.security import (
     InvalidTokenError,
@@ -144,3 +144,62 @@ def reset_password(session: Session, token: str, new_password: str) -> User:
     session.commit()
     session.refresh(user)
     return user
+
+
+class WrongPassword(Exception):
+    pass
+
+
+class NoPassword(Exception):
+    """Google-only account: there's no current password to check."""
+
+
+class SamePassword(Exception):
+    pass
+
+
+def me(user: User) -> MeOut:
+    return MeOut(
+        id=user.id,
+        full_name=user.full_name,
+        email=user.email,
+        has_password=user.hashed_password is not None,
+        google_linked=user.google_sub is not None,
+        created_at=user.created_at,
+    )
+
+
+def update_profile(session: Session, user: User, data: ProfileUpdate) -> User:
+    user.full_name = data.full_name
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+def change_password(session: Session, user: User, current: str, new: str) -> User:
+    """Changing it also changes the password fingerprint in every token, so all
+    older sessions (other devices included) stop working."""
+    if user.hashed_password is None:
+        raise NoPassword
+    if not verify_password(current, user.hashed_password):
+        raise WrongPassword
+    if verify_password(new, user.hashed_password):
+        raise SamePassword
+    user.hashed_password = hash_password(new)
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+def delete_account(session: Session, user: User, password: str | None, email: str | None) -> None:
+    """Confirmed with the password, or the email for Google-only accounts.
+    Everything the user owns goes with them (ON DELETE CASCADE)."""
+    if user.hashed_password is not None:
+        if not password or not verify_password(password, user.hashed_password):
+            raise WrongPassword
+    elif not email or not hmac.compare_digest(email.strip().lower(), user.email):
+        raise WrongPassword
+    session.delete(user)
+    session.commit()

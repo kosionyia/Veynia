@@ -7,8 +7,12 @@ from limits import RateLimitItem, parse
 from app.auth import service
 from app.auth.dependencies import CurrentUser
 from app.auth.schemas import (
+    ChangePasswordIn,
+    DeleteAccountIn,
     ForgotPasswordIn,
     GoogleLoginIn,
+    MeOut,
+    ProfileUpdate,
     RegisterIn,
     ResetPasswordIn,
     TokenOut,
@@ -31,6 +35,9 @@ FORGOT_PER_IP = [parse("5/hour")]
 # Stops anyone flooding one inbox with reset emails.
 FORGOT_PER_EMAIL = parse("3/hour")
 RESET_PER_IP = [parse("10/hour")]
+# Wrong current passwords (change password, delete account) per user: a stolen
+# session can't keep guessing the real password.
+ACCOUNT_PASSWORD_FAILURES = parse("5 per 15 minutes")
 
 FORGOT_PASSWORD_REPLY = {"detail": "If that email has an account, we've sent a reset link."}
 
@@ -119,6 +126,43 @@ def reset_password(data: ResetPasswordIn, request: Request, session: SessionDep)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get("/me", response_model=UserOut)
+@router.get("/me", response_model=MeOut)
 def me(user: CurrentUser):
-    return user
+    return service.me(user)
+
+
+@router.patch("/me", response_model=MeOut)
+def update_me(data: ProfileUpdate, user: CurrentUser, session: SessionDep):
+    return service.me(service.update_profile(session, user, data))
+
+
+@router.post("/change-password", response_model=TokenOut)
+def change_password(data: ChangePasswordIn, user: CurrentUser, session: SessionDep):
+    """Returns a new token: the change ends every older session, this one too."""
+    rate_limit.check(ACCOUNT_PASSWORD_FAILURES, "account-password", str(user.id))
+    try:
+        user = service.change_password(session, user, data.current_password, data.new_password)
+    except service.NoPassword:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "You sign in with Google, so there's no password to change. Ask for a reset link to set one.",
+        )
+    except service.WrongPassword:
+        rate_limit.record(ACCOUNT_PASSWORD_FAILURES, "account-password", str(user.id))
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Your current password is wrong.")
+    except service.SamePassword:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Choose a password you're not already using.")
+    rate_limit.clear(ACCOUNT_PASSWORD_FAILURES, "account-password", str(user.id))
+    return TokenOut(access_token=create_access_token(user.id, user.hashed_password), user_id=user.id)
+
+
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_me(data: DeleteAccountIn, user: CurrentUser, session: SessionDep):
+    rate_limit.check(ACCOUNT_PASSWORD_FAILURES, "account-password", str(user.id))
+    try:
+        service.delete_account(session, user, data.password, data.email)
+    except service.WrongPassword:
+        rate_limit.record(ACCOUNT_PASSWORD_FAILURES, "account-password", str(user.id))
+        detail = "That password is wrong." if user.hashed_password else "That's not your account's email."
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

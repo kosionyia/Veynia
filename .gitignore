@@ -22,3 +22,6 @@ __pycache__/
 
 # Experiments; data/ holds CV files
 spikes/
+
+# Brainstorming mockups (visual companion)
+.superpowers/
